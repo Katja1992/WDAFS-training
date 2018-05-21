@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 This was an ignored code chunk
+Aha I can change this here too!!
 
 ## R Markdown
 
