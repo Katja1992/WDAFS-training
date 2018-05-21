@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(tidyr)
 ```
+Read in data from https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1
 
 ```{r}
 catch_df <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", method = "libcurl"),
@@ -23,15 +24,45 @@ unique(catch_df$notesRegCode)
 ```
 ```{r}
 catch_df <- catch_df %>% 
-  select(-All, -notesRegCode)
+  select(-All, -notesRegCode) %>% 
+  gather(key = Species, value = Catch, -Region, -Year) %>% 
+  rename(catch_thousands = Catch)
+  
+```
+
+Found a typo in original data, corrected it, converted `catch_thousands`column to numeric, and created a new column with units# of fish
+#Gather
+
+key (column names) and value(values in the cells)
+
+
+-Region, -Year -> don't gather Region and Year, alternatively I could've called all the columns that we wanted in it
+
+
+Syntax of rename: Old name = new name!
+which(is.na)== TRUE -> which one is NA in my data set
+Now change I into a 1 and then go on with what we wanted to do initially
+```{r}
+catch_df<- catch_df %>% 
+  mutate(catch_thousands = ifelse(catch_thousands == "I", 1, catch_thousands)) %>% 
+  mutate(catch_thousands = as.integer(catch_thousands)) %>% 
+  mutate(catch = catch_thousands *1000)
 
 head(catch_df)
 ```
 
-```{r}
-catch_df <- catch_df %>% 
-  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+#Analysis
 
-head(catch_df)
+```{r}
+catch_df %>% 
+  group_by(Species, Year) %>% 
+  summarize(mean_catch = mean(catch), num_obs = n())
+```
+```{r}
+catch_df %>% 
+  filter(Species == "Chinook") %>% 
+  group_by (Region) %>% 
+  summarise(mean_catch = mean(catch)) %>% 
+  arrange(desc(mean_catch)) #sort in descending order by catch
 ```
 
