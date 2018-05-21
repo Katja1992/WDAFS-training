@@ -66,3 +66,29 @@ catch_df %>%
   arrange(desc(mean_catch)) #sort in descending order by catch
 ```
 
+#Joins
+
+Join another table into an existing one
+
+```{r}
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1", method = "libcurl"),
+                        stringsAsFactors = FALSE)
+head(region_defs)
+```
+
+```{r select what we want}
+region_defs <- region_defs %>% 
+  select(code, mgmtArea) %>% 
+  rename(Region = code, Region_Name = mgmtArea)
+
+head(region_defs)
+```
+renamed code and mgmtArea because of complication -> 
+catch_joined <- left_join(catch_df, region_defs, by = c("Region" = "code"))
+
+```{r Join}
+catch_joined <- left_join(catch_df, region_defs)
+
+head(catch_joined)
+```
+
